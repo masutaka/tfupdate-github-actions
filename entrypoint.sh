@@ -103,6 +103,7 @@ fi
 cd ${GITHUB_WORKSPACE}/
 
 export GITHUB_TOKEN
+git config --global --add safe.directory $GITHUB_WORKSPACE
 git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git
 git config --global user.email "action@github.com"
 git config --global user.name "GitHub Action"
