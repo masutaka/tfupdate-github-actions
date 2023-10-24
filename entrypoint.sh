@@ -24,7 +24,10 @@ function subcommandTerraform {
             echo "$VERSION" > "$TFENV_VERSION_FILE"
           fi
         done
-        git add . 
+        if [ -f ".terraform-version" ]; then
+          echo "$VERSION" > ".terraform-version"
+        fi
+        git add .
       fi
 
       git commit -m "$UPDATE_MESSAGE"
@@ -68,7 +71,7 @@ if [ "${INPUT_TFUPDATE_PATH}" != "" ]; then
   TFUPDATE_PATH=${INPUT_TFUPDATE_PATH}
 fi
 
-TFUPDATE_OPTIONS=""
+TFUPDATE_OPTIONS="-r"
 if [ "${INPUT_TFUPDATE_OPTIONS}" != "" ]; then
   TFUPDATE_OPTIONS=${INPUT_TFUPDATE_OPTIONS}
 fi
@@ -103,6 +106,7 @@ fi
 cd ${GITHUB_WORKSPACE}/
 
 export GITHUB_TOKEN
+git config --global --add safe.directory $GITHUB_WORKSPACE
 git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git
 git config --global user.email "action@github.com"
 git config --global user.name "GitHub Action"
