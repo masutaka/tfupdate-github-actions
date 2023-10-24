@@ -1,4 +1,4 @@
-name: 'tfupdate Github Actions'
+name: 'tfupdate Github Actions by masutaka'
 description: 'Runs tfupdate via Github Actions'
 inputs:
   tfupdate_subcommand:
