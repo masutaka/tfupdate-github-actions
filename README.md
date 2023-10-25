@@ -19,7 +19,7 @@ jobs:
     name: Update terraform versions
     steps:
     - name: "Checkout"
-      uses: actions/checkout@v1
+      uses: actions/checkout@v4
     - name: tfupdate
       uses: masutaka/tfupdate-github-actions@v2.1.0
       with:
@@ -33,7 +33,7 @@ jobs:
     name: Update provider versions
     steps:
     - name: "Checkout"
-      uses: actions/checkout@v1
+      uses: actions/checkout@v4
     - name: tfupdate
       uses: masutaka/tfupdate-github-actions@v2.1.0
       with:
