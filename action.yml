@@ -25,6 +25,9 @@ inputs:
   pr_base_branch:
     description: 'The base branch of a Pull Request'
     required: false
+  assignees:
+    description: 'A comma-separated list (no spaces around the comma) of GitHub handles to assign to this pull request'
+    required: false
 runs:
   using: 'docker'
   image: 'Dockerfile'

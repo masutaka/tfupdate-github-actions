@@ -26,6 +26,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: terraform
         tfupdate_path: './workspaces'
+        assignees: 'alice'
 
   test_provider_job:
     runs-on: ubuntu-latest
@@ -40,6 +41,7 @@ jobs:
         tfupdate_subcommand: provider
         tfupdate_path: './workspaces'
         tfupdate_provider_name: aws
+        assignees: 'alice,bob'
 ```
 
 You can see examples of Pull Requests to be created [here](https://github.com/daisaru11/tfupdate-github-actions-example/pulls).
