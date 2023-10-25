@@ -4,6 +4,7 @@ Github Actions for [tfupdate](https://github.com/minamijoyo/tfupdate).
 
 This action runs tfupdate, and create Pull Requests if new versions of terraform or providers are found.
 
+:bulb: This repository is a fork from [daisaru11/tfupdate-github-actions](https://github.com/daisaru11/tfupdate-github-actions). See [v1.0.0...HEAD](https://github.com/masutaka/tfupdate-github-actions/compare/v1.0.0...HEAD) for the differences.
 
 ## Usage
 
@@ -20,7 +21,7 @@ jobs:
     - name: "Checkout"
       uses: actions/checkout@v1
     - name: tfupdate
-      uses: masutaka/tfupdate-github-actions@v1
+      uses: masutaka/tfupdate-github-actions@v2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: terraform
@@ -33,7 +34,7 @@ jobs:
     - name: "Checkout"
       uses: actions/checkout@v1
     - name: tfupdate
-      uses: masutaka/tfupdate-github-actions@v1
+      uses: masutaka/tfupdate-github-actions@v2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: provider
