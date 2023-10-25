@@ -21,7 +21,7 @@ jobs:
     - name: "Checkout"
       uses: actions/checkout@v1
     - name: tfupdate
-      uses: masutaka/tfupdate-github-actions@v2.0.0
+      uses: masutaka/tfupdate-github-actions@v2.1.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: terraform
@@ -35,7 +35,7 @@ jobs:
     - name: "Checkout"
       uses: actions/checkout@v1
     - name: tfupdate
-      uses: masutaka/tfupdate-github-actions@v2.0.0
+      uses: masutaka/tfupdate-github-actions@v2.1.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: provider
