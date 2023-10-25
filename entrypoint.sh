@@ -5,7 +5,7 @@ set -eu
 function subcommandTerraform {
   VERSION=$(tfupdate release latest hashicorp/terraform)
 
-  UPDATE_MESSAGE="[tfupdate] Update terraform to v${VERSION}"
+  UPDATE_MESSAGE="[tfupdate] Update terraform to v${VERSION} in ${TFUPDATE_PATH}"
   if hub pr list -s "open" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
     echo "A pull request already exists"
   elif hub pr list -s "merged" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
@@ -40,7 +40,7 @@ function subcommandTerraform {
 function subcommandProvider {
   VERSION=$(tfupdate release latest terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME})
 
-  UPDATE_MESSAGE="[tfupdate] Update terraform-provider-${TFUPDATE_PROVIDER_NAME} to v${VERSION}"
+  UPDATE_MESSAGE="[tfupdate] Update terraform-provider-${TFUPDATE_PROVIDER_NAME} to v${VERSION} in ${TFUPDATE_PATH}"
   if hub pr list -s "open" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
     echo "A pull request already exists"
   elif hub pr list -s "merged" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
