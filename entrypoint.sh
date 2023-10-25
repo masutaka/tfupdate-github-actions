@@ -50,7 +50,11 @@ function subcommandTerraform {
 
       git commit -m "$UPDATE_MESSAGE"
       PR_BODY="For details see: https://github.com/hashicorp/terraform/releases"
-      git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PR_BODY" -b ${PR_BASE_BRANCH}
+      if [ -n "$ASSIGNEES" ]; then
+	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PR_BODY" -b ${PR_BASE_BRANCH} -a ${ASSIGNEES}
+      else
+	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PR_BODY" -b ${PR_BASE_BRANCH}
+      fi
     fi
   fi
 }
@@ -71,7 +75,12 @@ function subcommandProvider {
     else
       git commit -m "$UPDATE_MESSAGE"
       PULL_REQUEST_BODY="For details see: https://github.com/terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME}/releases"
-      git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PULL_REQUEST_BODY" -b ${PR_BASE_BRANCH}
+      if [ -n "$ASSIGNEES" ]; then
+	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PULL_REQUEST_BODY" -b ${PR_BASE_BRANCH} -a ${ASSIGNEES}
+      else
+	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PULL_REQUEST_BODY" -b ${PR_BASE_BRANCH}
+      fi
+
     fi
   fi
 }
@@ -111,6 +120,11 @@ fi
 PR_BASE_BRANCH="${GITHUB_REF##*/}"
 if [ "${INPUT_PR_BASE_BRANCH}" != "" ]; then
   PR_BASE_BRANCH=${INPUT_PR_BASE_BRANCH}
+fi
+
+ASSIGNEES=""
+if [ "${INPUT_ASSIGNEES}" != "" ]; then
+  ASSIGNEES=${INPUT_ASSIGNEES}
 fi
 
 GITHUB_TOKEN=""
