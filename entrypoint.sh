@@ -2,6 +2,24 @@
 
 set -eu
 
+function branchForTerraform {
+  STR=tfupdate
+  if [ $TFUPDATE_PATH != "." ]; then
+    # Trim $TFUPDATE_PATH to remove leading and trailing slashes ("/")
+    STR="$STR/$(echo $TFUPDATE_PATH | sed 's:^/*::' | sed 's:/*$::')"
+  fi
+  echo "${STR}/terraform-v${VERSION}"
+}
+
+function branchForProvider {
+  STR=tfupdate
+  if [ $TFUPDATE_PATH != "." ]; then
+    # Trim $TFUPDATE_PATH to remove leading and trailing slashes ("/")
+    STR="$STR/$(echo $TFUPDATE_PATH | sed 's:^/*::' | sed 's:/*$::')"
+  fi
+  echo "${STR}/terraform-provider/${TFUPDATE_PROVIDER_NAME}-v${VERSION}"
+}
+
 function subcommandTerraform {
   VERSION=$(tfupdate release latest hashicorp/terraform)
 
@@ -11,7 +29,7 @@ function subcommandTerraform {
   elif hub pr list -s "merged" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
     echo "A pull request is already merged"
   else
-    git checkout -b update-terraform-to-v${VERSION} origin/${PR_BASE_BRANCH}
+    git checkout -b $(branchForTerraform) origin/${PR_BASE_BRANCH}
     tfupdate terraform -v ${VERSION} ${TFUPDATE_OPTIONS} ${TFUPDATE_PATH}
 
     if git add . && git diff --cached --exit-code --quiet; then
@@ -46,7 +64,7 @@ function subcommandProvider {
   elif hub pr list -s "merged" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
     echo "A pull request is already merged"
   else
-    git checkout -b update-terraform-provider-${TFUPDATE_PROVIDER_NAME}-to-v${VERSION} origin/${PR_BASE_BRANCH}
+    git checkout -b $(branchForProvider) origin/${PR_BASE_BRANCH}
     tfupdate provider ${TFUPDATE_PROVIDER_NAME} -v ${VERSION} ${TFUPDATE_OPTIONS} ${TFUPDATE_PATH}
     if git add . && git diff --cached --exit-code --quiet; then
       echo "No changes"
