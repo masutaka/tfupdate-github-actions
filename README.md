@@ -8,33 +8,38 @@ This action runs tfupdate, and create Pull Requests if new versions of terraform
 
 ## Usage
 
-```
+```yaml
 on:
   schedule:
-    - cron:  '0 0 * * *'
+    - cron: '0 0 * * *'
 
 jobs:
-  test_terraform_job:
+  tfupdate_terraform:
     runs-on: ubuntu-latest
     name: Update terraform versions
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-    - name: "Checkout"
-      uses: actions/checkout@v4
-    - name: tfupdate
+    - uses: actions/checkout@v4
+    - name: Create terraform update PR if need
       uses: masutaka/tfupdate-github-actions@v2.1.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: terraform
         tfupdate_path: './workspaces'
         assignees: 'alice'
-
-  test_provider_job:
+  tfupdate_provider:
     runs-on: ubuntu-latest
-    name: Update provider versions
+    name: Update terraform provider versions
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-    - name: "Checkout"
-      uses: actions/checkout@v4
-    - name: tfupdate
+    - uses: actions/checkout@v4
+    - name: Create terraform provider update PR if need
       uses: masutaka/tfupdate-github-actions@v2.1.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
