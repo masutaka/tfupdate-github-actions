@@ -22,7 +22,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Create terraform update PR if need
       uses: masutaka/tfupdate-github-actions@v2.1.0
       with:
@@ -38,7 +38,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Create terraform provider update PR if need
       uses: masutaka/tfupdate-github-actions@v2.1.0
       with:
