@@ -34,7 +34,7 @@ permissions:
 | `update_tfenv_version_files` | No | `false` | Whether to update `.terraform-version` files (only for `terraform` subcommand) |
 | `update_tool_versions_files` | No | `false` | Whether to update `.tool-versions` files (only for `terraform` subcommand) |
 | `pr_base_branch` | No | Trigger branch | The base branch of a Pull Request |
-| `assignees` | No | — | Comma-separated list of GitHub handles to assign to the PR (no spaces around the comma) |
+| `assignees` | No | — | Comma-separated list of GitHub handles to assign to the PR |
 
 ## Subcommands
 
@@ -83,7 +83,7 @@ When `tfupdate_path` is `.`, the path segment is omitted.
 
 ### PR deduplication
 
-Before creating a PR, the action checks whether a PR with the same title already exists (open or merged). If a matching PR is found, the action skips creating a new one.
+Before creating a PR, the action checks whether a PR for the same branch already exists (open or merged). If a matching PR is found, the action skips creating a new one.
 
 ## Full example
 
@@ -94,7 +94,7 @@ on:
 
 jobs:
   tfupdate_terraform:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     name: Update terraform versions
     timeout-minutes: 5
     permissions:
@@ -110,7 +110,7 @@ jobs:
         tfupdate_path: './workspaces'
         assignees: 'alice'
   tfupdate_provider:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     name: Update terraform provider versions
     timeout-minutes: 5
     permissions:

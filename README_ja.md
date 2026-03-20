@@ -34,7 +34,7 @@ permissions:
 | `update_tfenv_version_files` | No | `false` | `.terraform-version` ファイルも更新するか (`terraform` サブコマンド専用) |
 | `update_tool_versions_files` | No | `false` | `.tool-versions` ファイルも更新するか (`terraform` サブコマンド専用) |
 | `pr_base_branch` | No | トリガーブランチ | Pull Request のベースブランチ |
-| `assignees` | No | — | PR にアサインする GitHub ハンドルのカンマ区切りリスト (カンマの前後にスペース不可) |
+| `assignees` | No | — | PR にアサインする GitHub ハンドルのカンマ区切りリスト |
 
 ## サブコマンド
 
@@ -83,7 +83,7 @@ permissions:
 
 ### PR 重複防止
 
-PR 作成前に、同じタイトルの PR が既に存在するか (open または merged) を確認します。一致する PR が見つかった場合、新しい PR の作成はスキップされます。
+PR 作成前に、同じブランチの PR が既に存在するか (open または merged) を確認します。一致する PR が見つかった場合、新しい PR の作成はスキップされます。
 
 ## 使用例
 
@@ -94,7 +94,7 @@ on:
 
 jobs:
   tfupdate_terraform:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     name: Update terraform versions
     timeout-minutes: 5
     permissions:
@@ -110,7 +110,7 @@ jobs:
         tfupdate_path: './workspaces'
         assignees: 'alice'
   tfupdate_provider:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     name: Update terraform provider versions
     timeout-minutes: 5
     permissions:
