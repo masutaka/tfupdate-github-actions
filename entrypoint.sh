@@ -1,6 +1,6 @@
-#!/bin/sh -l
+#!/usr/bin/env bash
 
-set -eu
+set -euo pipefail
 
 function branchForTerraform {
   STR=tfupdate
@@ -23,16 +23,17 @@ function branchForProvider {
 function subcommandTerraform {
   VERSION=$(tfupdate release latest hashicorp/terraform)
 
+  VERSION_BRANCH=$(branchForTerraform)
   UPDATE_MESSAGE="[tfupdate] Update terraform to v${VERSION} in ${TFUPDATE_PATH}"
-  if hub pr list -s "open" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
-    echo "A pull request already exists"
-  elif hub pr list -s "merged" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
-    echo "A pull request is already merged"
+  PR_COUNT="$(gh pr list --state all --head "${VERSION_BRANCH}" --json number --jq 'length')"
+  if [ "$PR_COUNT" -ne 0 ]; then
+    echo "A pull request already exists for branch ${VERSION_BRANCH}"
   else
-    git checkout -b $(branchForTerraform) origin/${PR_BASE_BRANCH}
+    git checkout -b "${VERSION_BRANCH}" origin/${PR_BASE_BRANCH}
     tfupdate terraform -v ${VERSION} ${TFUPDATE_OPTIONS} ${TFUPDATE_PATH}
 
-    if git add . && git diff --cached --exit-code --quiet; then
+    git add .
+    if git diff --cached --exit-code --quiet; then
       echo "No changes"
     else
       if [ "${UPDATE_TFENV_VERSION_FILES}" == "1" ]; then
@@ -65,10 +66,11 @@ function subcommandTerraform {
 
       git commit -m "$UPDATE_MESSAGE"
       PR_BODY="For details see: https://github.com/hashicorp/terraform/releases"
+      git push origin HEAD
       if [ -n "$ASSIGNEES" ]; then
-	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PR_BODY" -b ${PR_BASE_BRANCH} -a ${ASSIGNEES}
+        gh pr create --title "$UPDATE_MESSAGE" --body "$PR_BODY" --base "${PR_BASE_BRANCH}" --assignee "${ASSIGNEES}"
       else
-	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PR_BODY" -b ${PR_BASE_BRANCH}
+        gh pr create --title "$UPDATE_MESSAGE" --body "$PR_BODY" --base "${PR_BASE_BRANCH}"
       fi
     fi
   fi
@@ -77,23 +79,25 @@ function subcommandTerraform {
 function subcommandProvider {
   VERSION=$(tfupdate release latest terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME})
 
+  VERSION_BRANCH=$(branchForProvider)
   UPDATE_MESSAGE="[tfupdate] Update terraform-provider-${TFUPDATE_PROVIDER_NAME} to v${VERSION} in ${TFUPDATE_PATH}"
-  if hub pr list -s "open" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
-    echo "A pull request already exists"
-  elif hub pr list -s "merged" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
-    echo "A pull request is already merged"
+  PR_COUNT="$(gh pr list --state all --head "${VERSION_BRANCH}" --json number --jq 'length')"
+  if [ "$PR_COUNT" -ne 0 ]; then
+    echo "A pull request already exists for branch ${VERSION_BRANCH}"
   else
-    git checkout -b $(branchForProvider) origin/${PR_BASE_BRANCH}
+    git checkout -b "${VERSION_BRANCH}" origin/${PR_BASE_BRANCH}
     tfupdate provider ${TFUPDATE_PROVIDER_NAME} -v ${VERSION} ${TFUPDATE_OPTIONS} ${TFUPDATE_PATH}
-    if git add . && git diff --cached --exit-code --quiet; then
+    git add .
+    if git diff --cached --exit-code --quiet; then
       echo "No changes"
     else
       git commit -m "$UPDATE_MESSAGE"
       PULL_REQUEST_BODY="For details see: https://github.com/terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME}/releases"
+      git push origin HEAD
       if [ -n "$ASSIGNEES" ]; then
-	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PULL_REQUEST_BODY" -b ${PR_BASE_BRANCH} -a ${ASSIGNEES}
+        gh pr create --title "$UPDATE_MESSAGE" --body "$PULL_REQUEST_BODY" --base "${PR_BASE_BRANCH}" --assignee "${ASSIGNEES}"
       else
-	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PULL_REQUEST_BODY" -b ${PR_BASE_BRANCH}
+        gh pr create --title "$UPDATE_MESSAGE" --body "$PULL_REQUEST_BODY" --base "${PR_BASE_BRANCH}"
       fi
 
     fi
@@ -144,7 +148,7 @@ fi
 
 ASSIGNEES=""
 if [ "${INPUT_ASSIGNEES}" != "" ]; then
-  ASSIGNEES=${INPUT_ASSIGNEES}
+  ASSIGNEES=$(echo "${INPUT_ASSIGNEES}" | tr -d ' ')
 fi
 
 GITHUB_TOKEN=""
@@ -157,14 +161,13 @@ fi
 
 cd ${GITHUB_WORKSPACE}/
 
-export GITHUB_TOKEN
 git config --global --add safe.directory $GITHUB_WORKSPACE
 git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git
 git config --global user.email "action@github.com"
 git config --global user.name "GitHub Action"
 
 tfupdate --version
-hub --version
+gh --version
 
 case "${TFUPDATE_SUBCOMMAND}" in
   terraform)

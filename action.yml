@@ -33,5 +33,33 @@ inputs:
     description: 'A comma-separated list (no spaces around the comma) of GitHub handles to assign to this pull request'
     required: false
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: "composite"
+  steps:
+    - name: Install tfupdate
+      env:
+        TFUPDATE_VERSION: v0.9.3
+        TFUPDATE_SHA256: dfdc45648bb5e3efd4fb6e6e03fb672254041640116e2255380b5dfe7c01ff3a
+      run: |
+        curl -fL --output "$RUNNER_TEMP/tfupdate.tar.gz" "https://github.com/minamijoyo/tfupdate/releases/download/${TFUPDATE_VERSION}/tfupdate_${TFUPDATE_VERSION#v}_linux_amd64.tar.gz"
+        echo "${TFUPDATE_SHA256} $RUNNER_TEMP/tfupdate.tar.gz" | sha256sum -c -
+        tar xz -C "$RUNNER_TEMP" -f "$RUNNER_TEMP/tfupdate.tar.gz" tfupdate
+        echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+        export PATH="$RUNNER_TEMP:$PATH"
+        tfupdate --version
+      shell: bash
+
+    - name: Run entrypoint
+      run: ${{ github.action_path }}/entrypoint.sh
+      shell: bash
+      env:
+        INPUT_TFUPDATE_SUBCOMMAND: ${{ inputs.tfupdate_subcommand }}
+        INPUT_TFUPDATE_PATH: ${{ inputs.tfupdate_path }}
+        INPUT_TFUPDATE_OPTIONS: ${{ inputs.tfupdate_options }}
+        INPUT_TFUPDATE_PROVIDER_NAME: ${{ inputs.tfupdate_provider_name }}
+        INPUT_UPDATE_TFENV_VERSION_FILES: ${{ inputs.update_tfenv_version_files }}
+        INPUT_UPDATE_TOOL_VERSIONS_FILES: ${{ inputs.update_tool_versions_files }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github_token }}
+        INPUT_PR_BASE_BRANCH: ${{ inputs.pr_base_branch }}
+        INPUT_ASSIGNEES: ${{ inputs.assignees }}
+        GH_TOKEN: ${{ inputs.github_token }}
+        GH_REPO: ${{ github.repository }}
