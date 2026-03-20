@@ -1,12 +1,85 @@
 # tfupdate-github-actions
 
-Github Actions for [tfupdate](https://github.com/minamijoyo/tfupdate).
+<p>
+  <a href="./README.md"><img alt="README in English" src="https://img.shields.io/badge/English-d9d9d9"></a>
+  <a href="./README_ja.md"><img alt="日本語のREADME" src="https://img.shields.io/badge/日本語-d9d9d9"></a>
+</p>
 
-This action runs tfupdate, and create Pull Requests if new versions of terraform or providers are found.
+GitHub Actions for [tfupdate](https://github.com/minamijoyo/tfupdate).
 
-:bulb: This repository is a fork from [daisaru11/tfupdate-github-actions](https://github.com/daisaru11/tfupdate-github-actions). See [v1.0.0...HEAD](https://github.com/masutaka/tfupdate-github-actions/compare/v1.0.0...HEAD) for the differences.
+This action runs tfupdate to check for new versions of Terraform or providers, and automatically creates a Pull Request if updates are found.
 
-## Usage
+> [!NOTE]
+> This repository is a fork from [daisaru11/tfupdate-github-actions](https://github.com/daisaru11/tfupdate-github-actions). See [v1.0.0...HEAD](https://github.com/masutaka/tfupdate-github-actions/compare/v1.0.0...HEAD) for the differences.
+
+## Prerequisites
+
+The workflow job requires the following permissions:
+
+```yaml
+permissions:
+  contents: write       # To push a new branch
+  pull-requests: write  # To create a pull request
+```
+
+## Inputs
+
+| Name | Required | Default | Description |
+|------|----------|---------|-------------|
+| `github_token` | Yes | — | GitHub Token |
+| `tfupdate_subcommand` | Yes | — | Subcommand to execute (`terraform` or `provider`) |
+| `tfupdate_path` | Yes | `.` | A path provided to tfupdate |
+| `tfupdate_options` | No | `-r` | Options provided to tfupdate |
+| `tfupdate_provider_name` | No | — | Provider name (required when subcommand is `provider`) |
+| `update_tfenv_version_files` | No | `false` | Whether to update `.terraform-version` files (only for `terraform` subcommand) |
+| `pr_base_branch` | No | Trigger branch | The base branch of a Pull Request |
+| `assignees` | No | — | Comma-separated list of GitHub handles to assign to the PR |
+
+## Subcommands
+
+### `terraform`
+
+Fetches the latest Terraform version and updates version constraints in `.tf` files. If `update_tfenv_version_files` is enabled, `.terraform-version` files are also updated.
+
+```yaml
+- uses: masutaka/tfupdate-github-actions@v2.1.0
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    tfupdate_subcommand: terraform
+    tfupdate_path: './workspaces'
+    assignees: 'alice'
+```
+
+### `provider`
+
+Fetches the latest version of the specified Terraform provider and updates version constraints. `tfupdate_provider_name` is required for this subcommand.
+
+```yaml
+- uses: masutaka/tfupdate-github-actions@v2.1.0
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    tfupdate_subcommand: provider
+    tfupdate_path: './workspaces'
+    tfupdate_provider_name: aws
+    assignees: 'alice,bob'
+```
+
+## Branch naming and PR deduplication
+
+### Branch naming
+
+Branches are created with the following patterns:
+
+- `terraform`: `tfupdate/[path/]terraform-v{VERSION}`
+- `provider`: `tfupdate/[path/]terraform-provider/{name}-v{VERSION}`
+
+When `tfupdate_path` is `.`, the path segment is omitted.
+
+### PR deduplication
+
+Before creating a PR, the action checks whether a PR with the same title already exists (open or merged). If a matching PR is found, the action skips creating a new one.
+
+## Full example
 
 ```yaml
 on:
