@@ -48,7 +48,7 @@ Fetches the latest Terraform version and updates version constraints in `.tf` fi
 These version file updates target files in the same directory as changed `.tf` files and at the repository root.
 
 ```yaml
-- uses: masutaka/tfupdate-github-actions@v2.1.0
+- uses: masutaka/tfupdate-github-actions@v2.2.0
   with:
     github_token: ${{ secrets.GITHUB_TOKEN }}
     tfupdate_subcommand: terraform
@@ -61,7 +61,7 @@ These version file updates target files in the same directory as changed `.tf` f
 Fetches the latest version of the specified Terraform provider and updates version constraints. `tfupdate_provider_name` is required for this subcommand.
 
 ```yaml
-- uses: masutaka/tfupdate-github-actions@v2.1.0
+- uses: masutaka/tfupdate-github-actions@v2.2.0
   with:
     github_token: ${{ secrets.GITHUB_TOKEN }}
     tfupdate_subcommand: provider
@@ -103,7 +103,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Create terraform update PR if need
-      uses: masutaka/tfupdate-github-actions@v2.1.0
+      uses: masutaka/tfupdate-github-actions@v2.2.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: terraform
@@ -119,7 +119,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Create terraform provider update PR if need
-      uses: masutaka/tfupdate-github-actions@v2.1.0
+      uses: masutaka/tfupdate-github-actions@v2.2.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: provider
