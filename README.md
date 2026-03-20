@@ -28,12 +28,12 @@ permissions:
 |------|----------|---------|-------------|
 | `github_token` | Yes | — | GitHub Token |
 | `tfupdate_subcommand` | Yes | — | Subcommand to execute (`terraform` or `provider`) |
-| `tfupdate_path` | Yes | `.` | A path provided to tfupdate |
+| `tfupdate_path` | No | `.` | A path provided to tfupdate |
 | `tfupdate_options` | No | `-r` | Options provided to tfupdate |
 | `tfupdate_provider_name` | No | — | Provider name (required when subcommand is `provider`) |
 | `update_tfenv_version_files` | No | `false` | Whether to update `.terraform-version` files (only for `terraform` subcommand) |
 | `pr_base_branch` | No | Trigger branch | The base branch of a Pull Request |
-| `assignees` | No | — | Comma-separated list of GitHub handles to assign to the PR |
+| `assignees` | No | — | Comma-separated list of GitHub handles to assign to the PR (no spaces around the comma) |
 
 ## Subcommands
 

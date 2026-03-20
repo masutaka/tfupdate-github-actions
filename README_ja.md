@@ -28,12 +28,12 @@ permissions:
 |------|------|-----------|------|
 | `github_token` | Yes | — | GitHub Token |
 | `tfupdate_subcommand` | Yes | — | 実行するサブコマンド (`terraform` or `provider`) |
-| `tfupdate_path` | Yes | `.` | tfupdate に渡すパス |
+| `tfupdate_path` | No | `.` | tfupdate に渡すパス |
 | `tfupdate_options` | No | `-r` | tfupdate に渡すオプション |
 | `tfupdate_provider_name` | No | — | プロバイダー名 (サブコマンドが `provider` の場合は必須) |
 | `update_tfenv_version_files` | No | `false` | `.terraform-version` ファイルも更新するか (`terraform` サブコマンド専用) |
 | `pr_base_branch` | No | トリガーブランチ | Pull Request のベースブランチ |
-| `assignees` | No | — | PR にアサインする GitHub ハンドルのカンマ区切りリスト |
+| `assignees` | No | — | PR にアサインする GitHub ハンドルのカンマ区切りリスト (カンマの前後にスペース不可) |
 
 ## サブコマンド
 

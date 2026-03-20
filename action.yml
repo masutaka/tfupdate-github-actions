@@ -6,7 +6,7 @@ inputs:
     required: true
   tfupdate_path:
     description: 'A path provided to tfupdate'
-    required: true
+    required: false
     default: '.'
   tfupdate_options:
     description: 'Options provided to tfupdate'
