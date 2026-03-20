@@ -32,6 +32,7 @@ permissions:
 | `tfupdate_options` | No | `-r` | tfupdate に渡すオプション |
 | `tfupdate_provider_name` | No | — | プロバイダー名 (サブコマンドが `provider` の場合は必須) |
 | `update_tfenv_version_files` | No | `false` | `.terraform-version` ファイルも更新するか (`terraform` サブコマンド専用) |
+| `update_tool_versions_files` | No | `false` | `.tool-versions` ファイルも更新するか (`terraform` サブコマンド専用) |
 | `pr_base_branch` | No | トリガーブランチ | Pull Request のベースブランチ |
 | `assignees` | No | — | PR にアサインする GitHub ハンドルのカンマ区切りリスト (カンマの前後にスペース不可) |
 
@@ -39,7 +40,12 @@ permissions:
 
 ### `terraform`
 
-最新の Terraform バージョンを取得し、`.tf` ファイル内のバージョン制約を更新します。`update_tfenv_version_files` を有効にすると、`.terraform-version` ファイルも更新されます。
+最新の Terraform バージョンを取得し、`.tf` ファイル内のバージョン制約を更新します。
+
+- `update_tfenv_version_files`: `.terraform-version` ファイルも更新
+- `update_tool_versions_files`: `.tool-versions` ファイル内の `terraform` エントリも更新
+
+これらのバージョンファイルの更新対象は、変更された `.tf` ファイルと同じディレクトリ、およびリポジトリルートに存在するファイルのみです。
 
 ```yaml
 - uses: masutaka/tfupdate-github-actions@v2.1.0

@@ -32,6 +32,7 @@ permissions:
 | `tfupdate_options` | No | `-r` | Options provided to tfupdate |
 | `tfupdate_provider_name` | No | — | Provider name (required when subcommand is `provider`) |
 | `update_tfenv_version_files` | No | `false` | Whether to update `.terraform-version` files (only for `terraform` subcommand) |
+| `update_tool_versions_files` | No | `false` | Whether to update `.tool-versions` files (only for `terraform` subcommand) |
 | `pr_base_branch` | No | Trigger branch | The base branch of a Pull Request |
 | `assignees` | No | — | Comma-separated list of GitHub handles to assign to the PR (no spaces around the comma) |
 
@@ -39,7 +40,12 @@ permissions:
 
 ### `terraform`
 
-Fetches the latest Terraform version and updates version constraints in `.tf` files. If `update_tfenv_version_files` is enabled, `.terraform-version` files are also updated.
+Fetches the latest Terraform version and updates version constraints in `.tf` files.
+
+- `update_tfenv_version_files`: also updates `.terraform-version` files
+- `update_tool_versions_files`: also updates the `terraform` entry in `.tool-versions` files
+
+These version file updates target files in the same directory as changed `.tf` files and at the repository root.
 
 ```yaml
 - uses: masutaka/tfupdate-github-actions@v2.1.0
