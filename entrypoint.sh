@@ -48,6 +48,21 @@ function subcommandTerraform {
         git add .
       fi
 
+      if [ "${UPDATE_TOOL_VERSIONS_FILES}" == "1" ]; then
+        for UPDATED_HCL in $(git diff --cached --name-only); do
+          TOOL_VERSIONS_FILE="$(dirname $UPDATED_HCL)/.tool-versions"
+          if [ -f "$TOOL_VERSIONS_FILE" ] && grep -q '^terraform ' "$TOOL_VERSIONS_FILE"; then
+            sed "s/^terraform .*/terraform ${VERSION}/" "$TOOL_VERSIONS_FILE" > "$TOOL_VERSIONS_FILE.tmp"
+            mv "$TOOL_VERSIONS_FILE.tmp" "$TOOL_VERSIONS_FILE"
+          fi
+        done
+        if [ -f ".tool-versions" ] && grep -q '^terraform ' ".tool-versions"; then
+          sed "s/^terraform .*/terraform ${VERSION}/" ".tool-versions" > ".tool-versions.tmp"
+          mv ".tool-versions.tmp" ".tool-versions"
+        fi
+        git add .
+      fi
+
       git commit -m "$UPDATE_MESSAGE"
       PR_BODY="For details see: https://github.com/hashicorp/terraform/releases"
       if [ -n "$ASSIGNEES" ]; then
@@ -115,6 +130,11 @@ fi
 UPDATE_TFENV_VERSION_FILES=0
 if [ "${INPUT_UPDATE_TFENV_VERSION_FILES}" == "1" ] || [ "${INPUT_UPDATE_TFENV_VERSION_FILES}" == "true" ]; then
   UPDATE_TFENV_VERSION_FILES=1
+fi
+
+UPDATE_TOOL_VERSIONS_FILES=0
+if [ "${INPUT_UPDATE_TOOL_VERSIONS_FILES}" == "1" ] || [ "${INPUT_UPDATE_TOOL_VERSIONS_FILES}" == "true" ]; then
+  UPDATE_TOOL_VERSIONS_FILES=1
 fi
 
 PR_BASE_BRANCH="${GITHUB_REF##*/}"
