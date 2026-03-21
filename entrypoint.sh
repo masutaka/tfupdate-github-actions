@@ -4,18 +4,18 @@ set -euo pipefail
 
 function branchForTerraform {
   STR=tfupdate
-  if [ $TFUPDATE_PATH != "." ]; then
+  if [ "$TFUPDATE_PATH" != "." ]; then
     # Trim $TFUPDATE_PATH to remove leading and trailing slashes ("/")
-    STR="$STR/$(echo $TFUPDATE_PATH | sed 's:^/*::' | sed 's:/*$::')"
+    STR="$STR/$(echo "$TFUPDATE_PATH" | sed 's:^/*::' | sed 's:/*$::')"
   fi
   echo "${STR}/terraform-v${VERSION}"
 }
 
 function branchForProvider {
   STR=tfupdate
-  if [ $TFUPDATE_PATH != "." ]; then
+  if [ "$TFUPDATE_PATH" != "." ]; then
     # Trim $TFUPDATE_PATH to remove leading and trailing slashes ("/")
-    STR="$STR/$(echo $TFUPDATE_PATH | sed 's:^/*::' | sed 's:/*$::')"
+    STR="$STR/$(echo "$TFUPDATE_PATH" | sed 's:^/*::' | sed 's:/*$::')"
   fi
   echo "${STR}/terraform-provider/${TFUPDATE_PROVIDER_NAME}-v${VERSION}"
 }
@@ -159,9 +159,9 @@ else
   exit 1
 fi
 
-cd ${GITHUB_WORKSPACE}/
+cd "${GITHUB_WORKSPACE}/"
 
-git config --global --add safe.directory $GITHUB_WORKSPACE
+git config --global --add safe.directory "$GITHUB_WORKSPACE"
 git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git
 git config --global user.email "action@github.com"
 git config --global user.name "GitHub Action"
