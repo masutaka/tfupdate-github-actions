@@ -50,6 +50,9 @@ function subcommandTerraform {
   local version_branch
   version_branch=$(branchForTerraform "$version")
   local update_message="[tfupdate] Update terraform to v${version} in ${TFUPDATE_PATH}"
+  local updated_hcl
+  local tfenv_version_file
+  local tool_versions_file
 
   if hasExistingPR "${version_branch}"; then
     echo "A pull request already exists for branch ${version_branch}"
@@ -57,6 +60,7 @@ function subcommandTerraform {
   fi
 
   git checkout -b "${version_branch}" "origin/${PR_BASE_BRANCH}"
+  # shellcheck disable=SC2086
   tfupdate terraform -v "${version}" ${TFUPDATE_OPTIONS} "${TFUPDATE_PATH}"
 
   git add .
@@ -66,10 +70,10 @@ function subcommandTerraform {
   fi
 
   if [ "${UPDATE_TFENV_VERSION_FILES}" == "1" ]; then
-    for UPDATED_HCL in $(git diff --cached --name-only); do
-      TFENV_VERSION_FILE="$(dirname "$UPDATED_HCL")/.terraform-version"
-      if [ -f "$TFENV_VERSION_FILE" ]; then
-        echo "$version" > "$TFENV_VERSION_FILE"
+    for updated_hcl in $(git diff --cached --name-only); do
+      tfenv_version_file="$(dirname "$updated_hcl")/.terraform-version"
+      if [ -f "$tfenv_version_file" ]; then
+        echo "$version" > "$tfenv_version_file"
       fi
     done
     if [ -f ".terraform-version" ]; then
@@ -79,10 +83,10 @@ function subcommandTerraform {
   fi
 
   if [ "${UPDATE_TOOL_VERSIONS_FILES}" == "1" ]; then
-    for UPDATED_HCL in $(git diff --cached --name-only); do
-      TOOL_VERSIONS_FILE="$(dirname "$UPDATED_HCL")/.tool-versions"
-      if [ -f "$TOOL_VERSIONS_FILE" ] && grep -q '^terraform ' "$TOOL_VERSIONS_FILE"; then
-        sed -i "s/^terraform .*/terraform ${version}/" "$TOOL_VERSIONS_FILE"
+    for updated_hcl in $(git diff --cached --name-only); do
+      tool_versions_file="$(dirname "$updated_hcl")/.tool-versions"
+      if [ -f "$tool_versions_file" ] && grep -q '^terraform ' "$tool_versions_file"; then
+        sed -i "s/^terraform .*/terraform ${version}/" "$tool_versions_file"
       fi
     done
     if [ -f ".tool-versions" ] && grep -q '^terraform ' ".tool-versions"; then
@@ -96,7 +100,7 @@ function subcommandTerraform {
 
 function subcommandProvider {
   local version
-  version=$(tfupdate release latest terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME})
+  version=$(tfupdate release latest "terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME}")
 
   local version_branch
   version_branch=$(branchForProvider "$version")
@@ -108,6 +112,7 @@ function subcommandProvider {
   fi
 
   git checkout -b "${version_branch}" "origin/${PR_BASE_BRANCH}"
+  # shellcheck disable=SC2086
   tfupdate provider "${TFUPDATE_PROVIDER_NAME}" -v "${version}" ${TFUPDATE_OPTIONS} "${TFUPDATE_PATH}"
 
   git add .
