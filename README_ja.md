@@ -26,7 +26,7 @@ permissions:
 
 | 名前 | 必須 | デフォルト | 説明 |
 |------|------|-----------|------|
-| `github_token` | Yes | — | GitHub Token |
+| `github_token` | No | `github.token` | GitHub Token |
 | `tfupdate_subcommand` | Yes | — | 実行するサブコマンド (`terraform` or `provider`) |
 | `tfupdate_path` | No | `.` | tfupdate に渡すパス |
 | `tfupdate_options` | No | `-r` | tfupdate に渡すオプション |
@@ -34,7 +34,7 @@ permissions:
 | `update_tfenv_version_files` | No | `false` | `.terraform-version` ファイルも更新するか (`terraform` サブコマンド専用) |
 | `update_tool_versions_files` | No | `false` | `.tool-versions` ファイルも更新するか (`terraform` サブコマンド専用) |
 | `pr_base_branch` | No | トリガーブランチ | Pull Request のベースブランチ |
-| `assignees` | No | — | PR にアサインする GitHub ハンドルのカンマ区切りリスト (カンマの前後にスペース不可) |
+| `assignees` | No | — | PR にアサインする GitHub ハンドルのカンマ区切りリスト |
 
 ## サブコマンド
 
@@ -50,7 +50,6 @@ permissions:
 ```yaml
 - uses: masutaka/tfupdate-github-actions@v2.2.0
   with:
-    github_token: ${{ secrets.GITHUB_TOKEN }}
     tfupdate_subcommand: terraform
     tfupdate_path: './workspaces'
     assignees: 'alice'
@@ -63,7 +62,6 @@ permissions:
 ```yaml
 - uses: masutaka/tfupdate-github-actions@v2.2.0
   with:
-    github_token: ${{ secrets.GITHUB_TOKEN }}
     tfupdate_subcommand: provider
     tfupdate_path: './workspaces'
     tfupdate_provider_name: aws
@@ -83,7 +81,7 @@ permissions:
 
 ### PR 重複防止
 
-PR 作成前に、同じタイトルの PR が既に存在するか (open または merged) を確認します。一致する PR が見つかった場合、新しい PR の作成はスキップされます。
+PR 作成前に、同じブランチの PR が既に存在するか (open または merged) を確認します。一致する PR が見つかった場合、新しい PR の作成はスキップされます。
 
 ## 使用例
 
@@ -94,7 +92,7 @@ on:
 
 jobs:
   tfupdate_terraform:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     name: Update terraform versions
     timeout-minutes: 5
     permissions:
@@ -105,12 +103,11 @@ jobs:
     - name: Create terraform update PR if need
       uses: masutaka/tfupdate-github-actions@v2.2.0
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: terraform
         tfupdate_path: './workspaces'
         assignees: 'alice'
   tfupdate_provider:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     name: Update terraform provider versions
     timeout-minutes: 5
     permissions:
@@ -121,7 +118,6 @@ jobs:
     - name: Create terraform provider update PR if need
       uses: masutaka/tfupdate-github-actions@v2.2.0
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: provider
         tfupdate_path: './workspaces'
         tfupdate_provider_name: aws

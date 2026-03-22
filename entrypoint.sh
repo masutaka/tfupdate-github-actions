@@ -1,103 +1,122 @@
-#!/bin/sh -l
+#!/usr/bin/env bash
 
-set -eu
+set -euo pipefail
+
+function branchPrefix {
+  local prefix=tfupdate
+  if [ "$TFUPDATE_PATH" != "." ]; then
+    # Trim $TFUPDATE_PATH to remove leading and trailing slashes ("/")
+    prefix="${prefix}/$(echo "$TFUPDATE_PATH" | sed 's:^/*::;s:/*$::')"
+  fi
+  echo "$prefix"
+}
 
 function branchForTerraform {
-  STR=tfupdate
-  if [ $TFUPDATE_PATH != "." ]; then
-    # Trim $TFUPDATE_PATH to remove leading and trailing slashes ("/")
-    STR="$STR/$(echo $TFUPDATE_PATH | sed 's:^/*::' | sed 's:/*$::')"
-  fi
-  echo "${STR}/terraform-v${VERSION}"
+  local version="$1"
+  echo "$(branchPrefix)/terraform-v${version}"
 }
 
 function branchForProvider {
-  STR=tfupdate
-  if [ $TFUPDATE_PATH != "." ]; then
-    # Trim $TFUPDATE_PATH to remove leading and trailing slashes ("/")
-    STR="$STR/$(echo $TFUPDATE_PATH | sed 's:^/*::' | sed 's:/*$::')"
+  local version="$1"
+  echo "$(branchPrefix)/terraform-provider/${TFUPDATE_PROVIDER_NAME}-v${version}"
+}
+
+function hasExistingPR {
+  local branch="$1"
+  local pr_count
+  pr_count="$(gh pr list --state all --head "${branch}" --json number --jq 'length')"
+  [ "$pr_count" -ne 0 ]
+}
+
+function commitAndCreatePR {
+  local message="$1"
+  local body="$2"
+  local base_branch="$3"
+  local assignees="$4"
+
+  git commit -m "$message"
+  git push origin HEAD
+  if [ -n "$assignees" ]; then
+    gh pr create --title "$message" --body "$body" --base "${base_branch}" --assignee "${assignees}"
+  else
+    gh pr create --title "$message" --body "$body" --base "${base_branch}"
   fi
-  echo "${STR}/terraform-provider/${TFUPDATE_PROVIDER_NAME}-v${VERSION}"
 }
 
 function subcommandTerraform {
-  VERSION=$(tfupdate release latest hashicorp/terraform)
+  local version
+  version=$(tfupdate release latest hashicorp/terraform)
 
-  UPDATE_MESSAGE="[tfupdate] Update terraform to v${VERSION} in ${TFUPDATE_PATH}"
-  if hub pr list -s "open" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
-    echo "A pull request already exists"
-  elif hub pr list -s "merged" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
-    echo "A pull request is already merged"
-  else
-    git checkout -b $(branchForTerraform) origin/${PR_BASE_BRANCH}
-    tfupdate terraform -v ${VERSION} ${TFUPDATE_OPTIONS} ${TFUPDATE_PATH}
+  local version_branch
+  version_branch=$(branchForTerraform "$version")
+  local update_message="[tfupdate] Update terraform to v${version} in ${TFUPDATE_PATH}"
 
-    if git add . && git diff --cached --exit-code --quiet; then
-      echo "No changes"
-    else
-      if [ "${UPDATE_TFENV_VERSION_FILES}" == "1" ]; then
-        for UPDATED_HCL in $(git diff --cached --name-only); do
-          TFENV_VERSION_FILE="$(dirname $UPDATED_HCL)/.terraform-version"
-          if [ -f "$TFENV_VERSION_FILE" ]; then
-            echo "$VERSION" > "$TFENV_VERSION_FILE"
-          fi
-        done
-        if [ -f ".terraform-version" ]; then
-          echo "$VERSION" > ".terraform-version"
-        fi
-        git add .
-      fi
-
-      if [ "${UPDATE_TOOL_VERSIONS_FILES}" == "1" ]; then
-        for UPDATED_HCL in $(git diff --cached --name-only); do
-          TOOL_VERSIONS_FILE="$(dirname $UPDATED_HCL)/.tool-versions"
-          if [ -f "$TOOL_VERSIONS_FILE" ] && grep -q '^terraform ' "$TOOL_VERSIONS_FILE"; then
-            sed "s/^terraform .*/terraform ${VERSION}/" "$TOOL_VERSIONS_FILE" > "$TOOL_VERSIONS_FILE.tmp"
-            mv "$TOOL_VERSIONS_FILE.tmp" "$TOOL_VERSIONS_FILE"
-          fi
-        done
-        if [ -f ".tool-versions" ] && grep -q '^terraform ' ".tool-versions"; then
-          sed "s/^terraform .*/terraform ${VERSION}/" ".tool-versions" > ".tool-versions.tmp"
-          mv ".tool-versions.tmp" ".tool-versions"
-        fi
-        git add .
-      fi
-
-      git commit -m "$UPDATE_MESSAGE"
-      PR_BODY="For details see: https://github.com/hashicorp/terraform/releases"
-      if [ -n "$ASSIGNEES" ]; then
-	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PR_BODY" -b ${PR_BASE_BRANCH} -a ${ASSIGNEES}
-      else
-	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PR_BODY" -b ${PR_BASE_BRANCH}
-      fi
-    fi
+  if hasExistingPR "${version_branch}"; then
+    echo "A pull request already exists for branch ${version_branch}"
+    return
   fi
+
+  git checkout -b "${version_branch}" "origin/${PR_BASE_BRANCH}"
+  tfupdate terraform -v "${version}" ${TFUPDATE_OPTIONS} "${TFUPDATE_PATH}"
+
+  git add .
+  if git diff --cached --exit-code --quiet; then
+    echo "No changes"
+    return
+  fi
+
+  if [ "${UPDATE_TFENV_VERSION_FILES}" == "1" ]; then
+    for UPDATED_HCL in $(git diff --cached --name-only); do
+      TFENV_VERSION_FILE="$(dirname "$UPDATED_HCL")/.terraform-version"
+      if [ -f "$TFENV_VERSION_FILE" ]; then
+        echo "$version" > "$TFENV_VERSION_FILE"
+      fi
+    done
+    if [ -f ".terraform-version" ]; then
+      echo "$version" > ".terraform-version"
+    fi
+    git add .
+  fi
+
+  if [ "${UPDATE_TOOL_VERSIONS_FILES}" == "1" ]; then
+    for UPDATED_HCL in $(git diff --cached --name-only); do
+      TOOL_VERSIONS_FILE="$(dirname "$UPDATED_HCL")/.tool-versions"
+      if [ -f "$TOOL_VERSIONS_FILE" ] && grep -q '^terraform ' "$TOOL_VERSIONS_FILE"; then
+        sed -i "s/^terraform .*/terraform ${version}/" "$TOOL_VERSIONS_FILE"
+      fi
+    done
+    if [ -f ".tool-versions" ] && grep -q '^terraform ' ".tool-versions"; then
+      sed -i "s/^terraform .*/terraform ${version}/" ".tool-versions"
+    fi
+    git add .
+  fi
+
+  commitAndCreatePR "$update_message" "For details see: https://github.com/hashicorp/terraform/releases" "$PR_BASE_BRANCH" "$ASSIGNEES"
 }
 
 function subcommandProvider {
-  VERSION=$(tfupdate release latest terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME})
+  local version
+  version=$(tfupdate release latest terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME})
 
-  UPDATE_MESSAGE="[tfupdate] Update terraform-provider-${TFUPDATE_PROVIDER_NAME} to v${VERSION} in ${TFUPDATE_PATH}"
-  if hub pr list -s "open" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
-    echo "A pull request already exists"
-  elif hub pr list -s "merged" -f "%t: %U%n" | grep -F "$UPDATE_MESSAGE"; then
-    echo "A pull request is already merged"
-  else
-    git checkout -b $(branchForProvider) origin/${PR_BASE_BRANCH}
-    tfupdate provider ${TFUPDATE_PROVIDER_NAME} -v ${VERSION} ${TFUPDATE_OPTIONS} ${TFUPDATE_PATH}
-    if git add . && git diff --cached --exit-code --quiet; then
-      echo "No changes"
-    else
-      git commit -m "$UPDATE_MESSAGE"
-      PULL_REQUEST_BODY="For details see: https://github.com/terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME}/releases"
-      if [ -n "$ASSIGNEES" ]; then
-	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PULL_REQUEST_BODY" -b ${PR_BASE_BRANCH} -a ${ASSIGNEES}
-      else
-	git push origin HEAD && hub pull-request -m "$UPDATE_MESSAGE" -m "$PULL_REQUEST_BODY" -b ${PR_BASE_BRANCH}
-      fi
+  local version_branch
+  version_branch=$(branchForProvider "$version")
+  local update_message="[tfupdate] Update terraform-provider-${TFUPDATE_PROVIDER_NAME} to v${version} in ${TFUPDATE_PATH}"
 
-    fi
+  if hasExistingPR "${version_branch}"; then
+    echo "A pull request already exists for branch ${version_branch}"
+    return
   fi
+
+  git checkout -b "${version_branch}" "origin/${PR_BASE_BRANCH}"
+  tfupdate provider "${TFUPDATE_PROVIDER_NAME}" -v "${version}" ${TFUPDATE_OPTIONS} "${TFUPDATE_PATH}"
+
+  git add .
+  if git diff --cached --exit-code --quiet; then
+    echo "No changes"
+    return
+  fi
+
+  commitAndCreatePR "$update_message" "For details see: https://github.com/terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME}/releases" "$PR_BASE_BRANCH" "$ASSIGNEES"
 }
 
 TFUPDATE_SUBCOMMAND=""
@@ -144,27 +163,20 @@ fi
 
 ASSIGNEES=""
 if [ "${INPUT_ASSIGNEES}" != "" ]; then
-  ASSIGNEES=${INPUT_ASSIGNEES}
+  ASSIGNEES=$(echo "${INPUT_ASSIGNEES}" | tr -d ' ')
 fi
 
-GITHUB_TOKEN=""
-if [ "${INPUT_GITHUB_TOKEN}" != "" ]; then
-  GITHUB_TOKEN=${INPUT_GITHUB_TOKEN}
-else
-  echo "github_token is required"
-  exit 1
-fi
+GITHUB_TOKEN="${INPUT_GITHUB_TOKEN}"
 
-cd ${GITHUB_WORKSPACE}/
+cd "${GITHUB_WORKSPACE}/"
 
-export GITHUB_TOKEN
-git config --global --add safe.directory $GITHUB_WORKSPACE
-git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git
+git config --global --add safe.directory "$GITHUB_WORKSPACE"
+git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 git config --global user.email "action@github.com"
 git config --global user.name "GitHub Action"
 
 tfupdate --version
-hub --version
+gh --version
 
 case "${TFUPDATE_SUBCOMMAND}" in
   terraform)
@@ -178,4 +190,3 @@ case "${TFUPDATE_SUBCOMMAND}" in
     exit 1
     ;;
 esac
-
