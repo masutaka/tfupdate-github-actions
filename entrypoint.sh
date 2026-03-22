@@ -34,13 +34,16 @@ function commitAndCreatePR {
   local base_branch="$3"
   local assignees="$4"
 
+  local pr_url
+
   git commit -m "$message"
   git push origin HEAD
   if [ -n "$assignees" ]; then
-    gh pr create --title "$message" --body "$body" --base "${base_branch}" --assignee "${assignees}"
+    pr_url=$(gh pr create --title "$message" --body "$body" --base "${base_branch}" --assignee "${assignees}")
   else
-    gh pr create --title "$message" --body "$body" --base "${base_branch}"
+    pr_url=$(gh pr create --title "$message" --body "$body" --base "${base_branch}")
   fi
+  echo "::notice::Created PR: ${pr_url}"
 }
 
 function subcommandTerraform {
