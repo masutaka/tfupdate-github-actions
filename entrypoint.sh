@@ -12,11 +12,13 @@ function branchPrefix {
 }
 
 function branchForTerraform {
-  echo "$(branchPrefix)/terraform-v${VERSION}"
+  local version="$1"
+  echo "$(branchPrefix)/terraform-v${version}"
 }
 
 function branchForProvider {
-  echo "$(branchPrefix)/terraform-provider/${TFUPDATE_PROVIDER_NAME}-v${VERSION}"
+  local version="$1"
+  echo "$(branchPrefix)/terraform-provider/${TFUPDATE_PROVIDER_NAME}-v${version}"
 }
 
 function hasExistingPR {
@@ -29,29 +31,33 @@ function hasExistingPR {
 function commitAndCreatePR {
   local message="$1"
   local body="$2"
+  local base_branch="$3"
+  local assignees="$4"
 
   git commit -m "$message"
   git push origin HEAD
-  if [ -n "$ASSIGNEES" ]; then
-    gh pr create --title "$message" --body "$body" --base "${PR_BASE_BRANCH}" --assignee "${ASSIGNEES}"
+  if [ -n "$assignees" ]; then
+    gh pr create --title "$message" --body "$body" --base "${base_branch}" --assignee "${assignees}"
   else
-    gh pr create --title "$message" --body "$body" --base "${PR_BASE_BRANCH}"
+    gh pr create --title "$message" --body "$body" --base "${base_branch}"
   fi
 }
 
 function subcommandTerraform {
-  VERSION=$(tfupdate release latest hashicorp/terraform)
+  local version
+  version=$(tfupdate release latest hashicorp/terraform)
 
-  VERSION_BRANCH=$(branchForTerraform)
-  UPDATE_MESSAGE="[tfupdate] Update terraform to v${VERSION} in ${TFUPDATE_PATH}"
+  local version_branch
+  version_branch=$(branchForTerraform "$version")
+  local update_message="[tfupdate] Update terraform to v${version} in ${TFUPDATE_PATH}"
 
-  if hasExistingPR "${VERSION_BRANCH}"; then
-    echo "A pull request already exists for branch ${VERSION_BRANCH}"
+  if hasExistingPR "${version_branch}"; then
+    echo "A pull request already exists for branch ${version_branch}"
     return
   fi
 
-  git checkout -b "${VERSION_BRANCH}" "origin/${PR_BASE_BRANCH}"
-  tfupdate terraform -v "${VERSION}" ${TFUPDATE_OPTIONS} "${TFUPDATE_PATH}"
+  git checkout -b "${version_branch}" "origin/${PR_BASE_BRANCH}"
+  tfupdate terraform -v "${version}" ${TFUPDATE_OPTIONS} "${TFUPDATE_PATH}"
 
   git add .
   if git diff --cached --exit-code --quiet; then
@@ -63,11 +69,11 @@ function subcommandTerraform {
     for UPDATED_HCL in $(git diff --cached --name-only); do
       TFENV_VERSION_FILE="$(dirname "$UPDATED_HCL")/.terraform-version"
       if [ -f "$TFENV_VERSION_FILE" ]; then
-        echo "$VERSION" > "$TFENV_VERSION_FILE"
+        echo "$version" > "$TFENV_VERSION_FILE"
       fi
     done
     if [ -f ".terraform-version" ]; then
-      echo "$VERSION" > ".terraform-version"
+      echo "$version" > ".terraform-version"
     fi
     git add .
   fi
@@ -76,31 +82,33 @@ function subcommandTerraform {
     for UPDATED_HCL in $(git diff --cached --name-only); do
       TOOL_VERSIONS_FILE="$(dirname "$UPDATED_HCL")/.tool-versions"
       if [ -f "$TOOL_VERSIONS_FILE" ] && grep -q '^terraform ' "$TOOL_VERSIONS_FILE"; then
-        sed -i "s/^terraform .*/terraform ${VERSION}/" "$TOOL_VERSIONS_FILE"
+        sed -i "s/^terraform .*/terraform ${version}/" "$TOOL_VERSIONS_FILE"
       fi
     done
     if [ -f ".tool-versions" ] && grep -q '^terraform ' ".tool-versions"; then
-      sed -i "s/^terraform .*/terraform ${VERSION}/" ".tool-versions"
+      sed -i "s/^terraform .*/terraform ${version}/" ".tool-versions"
     fi
     git add .
   fi
 
-  commitAndCreatePR "$UPDATE_MESSAGE" "For details see: https://github.com/hashicorp/terraform/releases"
+  commitAndCreatePR "$update_message" "For details see: https://github.com/hashicorp/terraform/releases" "$PR_BASE_BRANCH" "$ASSIGNEES"
 }
 
 function subcommandProvider {
-  VERSION=$(tfupdate release latest terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME})
+  local version
+  version=$(tfupdate release latest terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME})
 
-  VERSION_BRANCH=$(branchForProvider)
-  UPDATE_MESSAGE="[tfupdate] Update terraform-provider-${TFUPDATE_PROVIDER_NAME} to v${VERSION} in ${TFUPDATE_PATH}"
+  local version_branch
+  version_branch=$(branchForProvider "$version")
+  local update_message="[tfupdate] Update terraform-provider-${TFUPDATE_PROVIDER_NAME} to v${version} in ${TFUPDATE_PATH}"
 
-  if hasExistingPR "${VERSION_BRANCH}"; then
-    echo "A pull request already exists for branch ${VERSION_BRANCH}"
+  if hasExistingPR "${version_branch}"; then
+    echo "A pull request already exists for branch ${version_branch}"
     return
   fi
 
-  git checkout -b "${VERSION_BRANCH}" "origin/${PR_BASE_BRANCH}"
-  tfupdate provider "${TFUPDATE_PROVIDER_NAME}" -v "${VERSION}" ${TFUPDATE_OPTIONS} "${TFUPDATE_PATH}"
+  git checkout -b "${version_branch}" "origin/${PR_BASE_BRANCH}"
+  tfupdate provider "${TFUPDATE_PROVIDER_NAME}" -v "${version}" ${TFUPDATE_OPTIONS} "${TFUPDATE_PATH}"
 
   git add .
   if git diff --cached --exit-code --quiet; then
@@ -108,7 +116,7 @@ function subcommandProvider {
     return
   fi
 
-  commitAndCreatePR "$UPDATE_MESSAGE" "For details see: https://github.com/terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME}/releases"
+  commitAndCreatePR "$update_message" "For details see: https://github.com/terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME}/releases" "$PR_BASE_BRANCH" "$ASSIGNEES"
 }
 
 TFUPDATE_SUBCOMMAND=""
