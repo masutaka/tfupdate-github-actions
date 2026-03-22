@@ -25,7 +25,8 @@ inputs:
     required: false
   github_token:
     description: 'Github Token'
-    required: true
+    required: false
+    default: ${{ github.token }}
   pr_base_branch:
     description: 'The base branch of a Pull Request'
     required: false

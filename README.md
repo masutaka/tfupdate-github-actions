@@ -26,7 +26,7 @@ permissions:
 
 | Name | Required | Default | Description |
 |------|----------|---------|-------------|
-| `github_token` | Yes | — | GitHub Token |
+| `github_token` | No | `github.token` | GitHub Token |
 | `tfupdate_subcommand` | Yes | — | Subcommand to execute (`terraform` or `provider`) |
 | `tfupdate_path` | No | `.` | A path provided to tfupdate |
 | `tfupdate_options` | No | `-r` | Options provided to tfupdate |
@@ -50,7 +50,6 @@ These version file updates target files in the same directory as changed `.tf` f
 ```yaml
 - uses: masutaka/tfupdate-github-actions@v2.2.0
   with:
-    github_token: ${{ secrets.GITHUB_TOKEN }}
     tfupdate_subcommand: terraform
     tfupdate_path: './workspaces'
     assignees: 'alice'
@@ -63,7 +62,6 @@ Fetches the latest version of the specified Terraform provider and updates versi
 ```yaml
 - uses: masutaka/tfupdate-github-actions@v2.2.0
   with:
-    github_token: ${{ secrets.GITHUB_TOKEN }}
     tfupdate_subcommand: provider
     tfupdate_path: './workspaces'
     tfupdate_provider_name: aws
@@ -105,7 +103,6 @@ jobs:
     - name: Create terraform update PR if need
       uses: masutaka/tfupdate-github-actions@v2.2.0
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: terraform
         tfupdate_path: './workspaces'
         assignees: 'alice'
@@ -121,7 +118,6 @@ jobs:
     - name: Create terraform provider update PR if need
       uses: masutaka/tfupdate-github-actions@v2.2.0
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: provider
         tfupdate_path: './workspaces'
         tfupdate_provider_name: aws

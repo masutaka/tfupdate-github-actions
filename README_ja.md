@@ -26,7 +26,7 @@ permissions:
 
 | 名前 | 必須 | デフォルト | 説明 |
 |------|------|-----------|------|
-| `github_token` | Yes | — | GitHub Token |
+| `github_token` | No | `github.token` | GitHub Token |
 | `tfupdate_subcommand` | Yes | — | 実行するサブコマンド (`terraform` or `provider`) |
 | `tfupdate_path` | No | `.` | tfupdate に渡すパス |
 | `tfupdate_options` | No | `-r` | tfupdate に渡すオプション |
@@ -50,7 +50,6 @@ permissions:
 ```yaml
 - uses: masutaka/tfupdate-github-actions@v2.2.0
   with:
-    github_token: ${{ secrets.GITHUB_TOKEN }}
     tfupdate_subcommand: terraform
     tfupdate_path: './workspaces'
     assignees: 'alice'
@@ -63,7 +62,6 @@ permissions:
 ```yaml
 - uses: masutaka/tfupdate-github-actions@v2.2.0
   with:
-    github_token: ${{ secrets.GITHUB_TOKEN }}
     tfupdate_subcommand: provider
     tfupdate_path: './workspaces'
     tfupdate_provider_name: aws
@@ -105,7 +103,6 @@ jobs:
     - name: Create terraform update PR if need
       uses: masutaka/tfupdate-github-actions@v2.2.0
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: terraform
         tfupdate_path: './workspaces'
         assignees: 'alice'
@@ -121,7 +118,6 @@ jobs:
     - name: Create terraform provider update PR if need
       uses: masutaka/tfupdate-github-actions@v2.2.0
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
         tfupdate_subcommand: provider
         tfupdate_path: './workspaces'
         tfupdate_provider_name: aws
