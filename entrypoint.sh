@@ -53,13 +53,11 @@ function subcommandTerraform {
         for UPDATED_HCL in $(git diff --cached --name-only); do
           TOOL_VERSIONS_FILE="$(dirname $UPDATED_HCL)/.tool-versions"
           if [ -f "$TOOL_VERSIONS_FILE" ] && grep -q '^terraform ' "$TOOL_VERSIONS_FILE"; then
-            sed "s/^terraform .*/terraform ${VERSION}/" "$TOOL_VERSIONS_FILE" > "$TOOL_VERSIONS_FILE.tmp"
-            mv "$TOOL_VERSIONS_FILE.tmp" "$TOOL_VERSIONS_FILE"
+            sed -i "s/^terraform .*/terraform ${VERSION}/" "$TOOL_VERSIONS_FILE"
           fi
         done
         if [ -f ".tool-versions" ] && grep -q '^terraform ' ".tool-versions"; then
-          sed "s/^terraform .*/terraform ${VERSION}/" ".tool-versions" > ".tool-versions.tmp"
-          mv ".tool-versions.tmp" ".tool-versions"
+          sed -i "s/^terraform .*/terraform ${VERSION}/" ".tool-versions"
         fi
         git add .
       fi
