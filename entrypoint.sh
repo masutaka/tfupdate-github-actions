@@ -24,7 +24,7 @@ function branchForProvider {
 function hasExistingPR {
   local branch="$1"
   local pr_count
-  pr_count="$(gh pr list --state all --head "${branch}" --json number --jq 'length')"
+  pr_count="$(gh pr list --state open --head "${branch}" --json number --jq 'length')"
   [ "$pr_count" -ne 0 ]
 }
 
