@@ -48,7 +48,7 @@ permissions:
 これらのバージョンファイルの更新対象は、変更された `.tf` ファイルと同じディレクトリ、およびリポジトリルートに存在するファイルのみです。
 
 ```yaml
-- uses: masutaka/tfupdate-github-actions@v2.2.0
+- uses: masutaka/tfupdate-github-actions@v3.0.0
   with:
     tfupdate_subcommand: terraform
     tfupdate_path: './workspaces'
@@ -60,7 +60,7 @@ permissions:
 指定された Terraform プロバイダーの最新バージョンを取得し、バージョン制約を更新します。このサブコマンドでは `tfupdate_provider_name` が必須です。
 
 ```yaml
-- uses: masutaka/tfupdate-github-actions@v2.2.0
+- uses: masutaka/tfupdate-github-actions@v3.0.0
   with:
     tfupdate_subcommand: provider
     tfupdate_path: './workspaces'
@@ -101,7 +101,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Create terraform update PR if need
-      uses: masutaka/tfupdate-github-actions@v2.2.0
+      uses: masutaka/tfupdate-github-actions@v3.0.0
       with:
         tfupdate_subcommand: terraform
         tfupdate_path: './workspaces'
@@ -116,7 +116,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Create terraform provider update PR if need
-      uses: masutaka/tfupdate-github-actions@v2.2.0
+      uses: masutaka/tfupdate-github-actions@v3.0.0
       with:
         tfupdate_subcommand: provider
         tfupdate_path: './workspaces'

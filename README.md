@@ -48,7 +48,7 @@ Fetches the latest Terraform version and updates version constraints in `.tf` fi
 These version file updates target files in the same directory as changed `.tf` files and at the repository root.
 
 ```yaml
-- uses: masutaka/tfupdate-github-actions@v2.2.0
+- uses: masutaka/tfupdate-github-actions@v3.0.0
   with:
     tfupdate_subcommand: terraform
     tfupdate_path: './workspaces'
@@ -60,7 +60,7 @@ These version file updates target files in the same directory as changed `.tf` f
 Fetches the latest version of the specified Terraform provider and updates version constraints. `tfupdate_provider_name` is required for this subcommand.
 
 ```yaml
-- uses: masutaka/tfupdate-github-actions@v2.2.0
+- uses: masutaka/tfupdate-github-actions@v3.0.0
   with:
     tfupdate_subcommand: provider
     tfupdate_path: './workspaces'
@@ -101,7 +101,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Create terraform update PR if need
-      uses: masutaka/tfupdate-github-actions@v2.2.0
+      uses: masutaka/tfupdate-github-actions@v3.0.0
       with:
         tfupdate_subcommand: terraform
         tfupdate_path: './workspaces'
@@ -116,7 +116,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Create terraform provider update PR if need
-      uses: masutaka/tfupdate-github-actions@v2.2.0
+      uses: masutaka/tfupdate-github-actions@v3.0.0
       with:
         tfupdate_subcommand: provider
         tfupdate_path: './workspaces'
