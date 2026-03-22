@@ -57,6 +57,7 @@ function subcommandTerraform {
   fi
 
   git checkout -b "${version_branch}" "origin/${PR_BASE_BRANCH}"
+  # shellcheck disable=SC2086
   tfupdate terraform -v "${version}" ${TFUPDATE_OPTIONS} "${TFUPDATE_PATH}"
 
   git add .
@@ -96,7 +97,7 @@ function subcommandTerraform {
 
 function subcommandProvider {
   local version
-  version=$(tfupdate release latest terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME})
+  version=$(tfupdate release latest "terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME}")
 
   local version_branch
   version_branch=$(branchForProvider "$version")
@@ -108,6 +109,7 @@ function subcommandProvider {
   fi
 
   git checkout -b "${version_branch}" "origin/${PR_BASE_BRANCH}"
+  # shellcheck disable=SC2086
   tfupdate provider "${TFUPDATE_PROVIDER_NAME}" -v "${version}" ${TFUPDATE_OPTIONS} "${TFUPDATE_PATH}"
 
   git add .
