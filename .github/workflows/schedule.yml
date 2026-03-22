@@ -6,9 +6,6 @@ on:
 
 jobs:
   codeql:
-    strategy:
-      matrix:
-        language: [actions]
     permissions:
       actions: read
       checks: read
@@ -16,7 +13,7 @@ jobs:
       security-events: write
     uses: masutaka/actions/.github/workflows/codeql_core.yml@main
     with:
-      language: ${{ matrix.language }}
+      language: actions
   pushover:
     name: pushover if failure
     if: github.ref_name == github.event.repository.default_branch && failure()
