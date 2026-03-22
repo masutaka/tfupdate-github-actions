@@ -90,12 +90,12 @@ function subcommandProvider {
       echo "No changes"
     else
       git commit -m "$UPDATE_MESSAGE"
-      PULL_REQUEST_BODY="For details see: https://github.com/terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME}/releases"
+      PR_BODY="For details see: https://github.com/terraform-providers/terraform-provider-${TFUPDATE_PROVIDER_NAME}/releases"
       git push origin HEAD
       if [ -n "$ASSIGNEES" ]; then
-        gh pr create --title "$UPDATE_MESSAGE" --body "$PULL_REQUEST_BODY" --base "${PR_BASE_BRANCH}" --assignee "${ASSIGNEES}"
+        gh pr create --title "$UPDATE_MESSAGE" --body "$PR_BODY" --base "${PR_BASE_BRANCH}" --assignee "${ASSIGNEES}"
       else
-        gh pr create --title "$UPDATE_MESSAGE" --body "$PULL_REQUEST_BODY" --base "${PR_BASE_BRANCH}"
+        gh pr create --title "$UPDATE_MESSAGE" --body "$PR_BODY" --base "${PR_BASE_BRANCH}"
       fi
 
     fi
