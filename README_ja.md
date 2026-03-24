@@ -1,5 +1,11 @@
 # tfupdate-github-actions
 
+[![CI](https://github.com/masutaka/tfupdate-github-actions/actions/workflows/ci.yml/badge.svg?branch=main)][ci]
+[![Schedule](https://github.com/masutaka/tfupdate-github-actions/actions/workflows/schedule.yml/badge.svg?branch=main)][schedule]
+
+[ci]: https://github.com/masutaka/tfupdate-github-actions/actions/workflows/ci.yml?query=branch%3Amain
+[schedule]: https://github.com/masutaka/tfupdate-github-actions/actions/workflows/schedule.yml?query=branch%3Amain
+
 <p>
   <a href="./README.md"><img alt="README in English" src="https://img.shields.io/badge/English-d9d9d9"></a>
   <a href="./README_ja.md"><img alt="日本語のREADME" src="https://img.shields.io/badge/日本語-d9d9d9"></a>
