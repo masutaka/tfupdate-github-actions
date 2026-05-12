@@ -1,41 +1,46 @@
-name: 'tfupdate Github Actions by masutaka'
-description: 'Runs tfupdate via Github Actions'
+name: "tfupdate Github Actions by masutaka"
+description: "Runs tfupdate via Github Actions"
+
 inputs:
   tfupdate_subcommand:
-    description: 'Subcommand to execute'
+    description: "Subcommand to execute"
     required: true
   tfupdate_path:
-    description: 'A path provided to tfupdate'
+    description: "A path provided to tfupdate"
     required: false
-    default: '.'
+    default: "."
   tfupdate_options:
-    description: 'Options provided to tfupdate'
+    description: "Options provided to tfupdate"
     required: false
-    default: '-r'
+    default: "-r"
   tfupdate_provider_name:
-    description: 'A name of provider (used if `provider` is given as the subcommand)'
+    description: "A name of provider (used if `provider` is given as the subcommand)"
     required: false
   update_tfenv_version_files:
-    description: 'Whether of not to update .terraform-version files (used if `terraform` is given as the subcommand)'
-    default: 'false'
+    description: "Whether of not to update .terraform-version files (used if
+      `terraform` is given as the subcommand)"
+    default: "false"
     required: false
   update_tool_versions_files:
-    description: 'Whether or not to update .tool-versions files (used if `terraform` is given as the subcommand)'
-    default: 'false'
+    description: "Whether or not to update .tool-versions files (used if `terraform`
+      is given as the subcommand)"
+    default: "false"
     required: false
   github_token:
-    description: 'Github Token'
+    description: "Github Token"
     required: false
     default: ${{ github.token }}
   pr_base_branch:
-    description: 'The base branch of a Pull Request'
+    description: "The base branch of a Pull Request"
     required: false
   assignees:
-    description: 'A comma-separated list of GitHub handles to assign to this pull request'
+    description: "A comma-separated list of GitHub handles to assign to this pull request"
     required: false
+
 branding:
   icon: "arrow-up-circle"
   color: "purple"
+
 runs:
   using: "composite"
   steps:
