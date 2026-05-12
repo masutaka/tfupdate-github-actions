@@ -33,6 +33,9 @@ inputs:
   assignees:
     description: 'A comma-separated list of GitHub handles to assign to this pull request'
     required: false
+branding:
+  icon: "arrow-up-circle"
+  color: "purple"
 runs:
   using: "composite"
   steps:
