@@ -38,8 +38,8 @@ runs:
   steps:
     - name: Install tfupdate
       env:
-        TFUPDATE_VERSION: v0.9.3
-        TFUPDATE_SHA256: dfdc45648bb5e3efd4fb6e6e03fb672254041640116e2255380b5dfe7c01ff3a
+        TFUPDATE_VERSION: v0.9.4
+        TFUPDATE_SHA256: fbaecf2d6b4180792239076f917c35d12a8a67c7b223b8e9a36ab3852d4913e3
       run: |
         curl -fL --output "$RUNNER_TEMP/tfupdate.tar.gz" "https://github.com/minamijoyo/tfupdate/releases/download/${TFUPDATE_VERSION}/tfupdate_${TFUPDATE_VERSION#v}_linux_amd64.tar.gz"
         echo "${TFUPDATE_SHA256} $RUNNER_TEMP/tfupdate.tar.gz" | sha256sum -c -
